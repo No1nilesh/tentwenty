@@ -1,7 +1,7 @@
 "use client";
 import { SliderImageData } from "@data";
 import Image from "next/image";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 
 export default function ProductCatalog() {
   const containerRef = useRef(null);
@@ -10,21 +10,36 @@ export default function ProductCatalog() {
   const [startX, setStartX] = useState(0);
   const [rotationAngle, setRotationAngle] = useState(0);
 
-  useEffect(() => {
-    const radius = 750; // Radius of the circle
+  const calculatePositions = useCallback(() => {
+    const radius = window.innerWidth < 750 ? 400 : 750; // Radius of the circle
     const container = containerRef.current;
     const centerX = container.offsetWidth / 2;
     const centerY = container.offsetHeight / 2;
     const angleStep = (2 * Math.PI) / SliderImageData.length;
 
     SliderImageData.forEach((item, index) => {
-      const angle = index * angleStep + rotationAngle;
+      const angle = index * angleStep;
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
       const rotation = (angle * 180) / Math.PI + 90;
       const element = container.children[index];
-      element.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+      element.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg`;
     });
+  }, []);
+
+  useEffect(() => {
+    calculatePositions();
+    window.addEventListener("resize", calculatePositions);
+
+    return () => {
+      window.removeEventListener("resize", calculatePositions);
+    };
+  }, [calculatePositions]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    container.style.transition = "transform 0.5s ease";
+    container.style.transform = `rotate(${rotationAngle}deg)`;
   }, [rotationAngle]);
 
   const handleMouseDown = (e) => {
@@ -33,16 +48,19 @@ export default function ProductCatalog() {
     setCursorGrabbed("grabbing");
   };
 
-  const handleMouseMove = (e) => {
-    if (!pressed) return;
-    e.preventDefault();
-    const currentX = e.nativeEvent.offsetX;
-    const diffX = currentX - startX;
-    const sensitivity = 0.3;
-    const rotationIncrement = diffX * sensitivity;
-    setRotationAngle((prevAngle) => prevAngle + rotationIncrement);
-    setStartX(currentX);
-  };
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!pressed) return;
+      e.preventDefault();
+      const currentX = e.nativeEvent.offsetX;
+      const diffX = currentX - startX;
+      const sensitivity = 0.3;
+      const rotationIncrement = diffX * sensitivity;
+      setRotationAngle((prevAngle) => prevAngle + rotationIncrement);
+      setStartX(currentX);
+    },
+    [startX, pressed]
+  );
 
   const handleMouseUp = () => {
     setPressed(false);
@@ -50,14 +68,12 @@ export default function ProductCatalog() {
   };
 
   const handleMouseLeave = () => {
-    if (pressed) {
-      setPressed(false);
-      setCursorGrabbed("grab");
-    }
+    setPressed(false);
+    setCursorGrabbed("grab");
   };
 
   return (
-    <section className="flex flex-col items-center">
+    <section className="h-screen md:h-auto flex flex-col items-center">
       <div className="mt-12 md:mt-60">
         <h2 className="text-[1.875rem] md:text-6xl font-normal text-center">
           Quality Products
@@ -70,7 +86,7 @@ export default function ProductCatalog() {
         </p>
       </div>
 
-      <div className="h-screen w-screen flex justify-center items-center overflow-hidden">
+      <div className=" h-[50vh] md:h-screen w-screen flex justify-center items-center overflow-hidden">
         <div
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -89,7 +105,7 @@ export default function ProductCatalog() {
                 alt={item.name}
                 height={500} // Adjust height and width as needed
                 width={500} // Adjust height and width as needed
-                className="max-w-96 aspect-[9/13] object-cover"
+                className="max-w-48 md:max-w-96 aspect-[9/13] object-cover"
               />
             </div>
           ))}
