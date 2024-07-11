@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #ffffff;
+  --background: #fffcfa;
+  --head-color: #000000;
+  --text-color: #7a7777;
+  --border-color: #eef4f9;
+}
+
+.active {
+  @apply h-screen transition-[height] ease-in-out duration-[1500ms];
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+}
+
+.animate.grow-line-1 {
+  width: 0;
+  top: 0;
+  left: 0;
+  animation: drawLine1 1s forwards;
+}
+.animate.grow-line-2 {
+  height: 0;
+  top: 0;
+  right: 0;
+  animation: drawLine2 1s forwards 1s;
+}
+.animate.grow-line-3 {
+  width: 0;
+  bottom: 0;
+  right: 0;
+  animation: drawLine3 1s forwards 2s;
+}
+.animate.grow-line-4 {
+  height: 0;
+  bottom: 0;
+  left: 0;
+  animation: drawLine4 1s forwards 3s;
+}
+
+@keyframes drawLine1 {
+  to {
+    width: 100%;
+  }
+}
+@keyframes drawLine2 {
+  to {
+    height: 100%;
+  }
+}
+@keyframes drawLine3 {
+  to {
+    width: 100%;
+  }
+}
+@keyframes drawLine4 {
+  to {
+    height: 100%;
+  }
+}
